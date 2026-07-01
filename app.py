@@ -24,8 +24,11 @@ def create_event():
     # TODO: Task 2 - Design and Develop the Code
     data = request.get_json()
     # TODO: Task 3 - Implement the Loop and Process Each Element
+    if not data or "title" not in data:
+        return jsonify({"error": "Title is required"}), 400
+
     new_id = max((e.id for e in events), default=0) + 1
-    new_event = Event(id=new_id, title=data.get("title"))
+    new_event = Event(new_id, title=data["title"])
     events.append(new_event)
     # TODO: Task 4 - Return and Handle Results
     return jsonify(new_event.to_dict()), 201
@@ -38,12 +41,12 @@ def update_event(event_id):
     data = request.get_json()
     # TODO: Task 3 - Implement the Loop and Process Each Element
     event = next((e for e in events if e.id == event_id), None)
-    if not event:
-        return ("Event not found", 404)
+    if event is None:
+        return jsonify({"error": "Event not found"}), 404
     # TODO: Task 4 - Return and Handle Results
-    if "title" in data:
+    if data and "title" in data:
         event.title = data["title"]
-    return jsonify(event.to_dict())
+    return jsonify(event.to_dict()), 200
 
 # TODO: Task 1 - Define the Problem
 # Remove an event from the list
@@ -53,11 +56,11 @@ def delete_event(event_id):
     global events
     # TODO: Task 3 - Implement the Loop and Process Each Element
     event = next((e for e in events if e.id == event_id), None)
-    if not event:
-        return ("Event not found", 404)
+    if event is None:
+        return jsonify({"error": "Event not found"}), 404
     # TODO: Task 4 - Return and Handle Results
     events = [e for e in events if e.id != event_id]
-    return ("Event deleted", 200)
+    return jsonify({"message": "Event deleted"}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
